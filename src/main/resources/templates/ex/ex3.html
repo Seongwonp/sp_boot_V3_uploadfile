@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout1.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>ex3</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <h1>ex3.html 이부분 외 고정됨.</h1>
+</div>
+<script layout:fragment="script" th:inline="javascript">
+    // document.write('script (ex3.html)');
+
+
+    const arr = [[${arr}]];
+    console.log(arr);
+    document.write(arr.toString());
+
+</script>
+
+</body>
+</html>

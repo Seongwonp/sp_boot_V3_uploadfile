@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>Post Details</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <!-- Post Header Card -->
+        <div class="card border-0 shadow rounded-4 mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="fw-bold mb-0 text-primary" th:text="${dto.title}">Post Title</h3>
+                    <span class="badge bg-info text-dark" th:text="${dto.writer}">Author</span>
+                </div>
+                <div class="mb-3 text-muted small">
+                    <i class="bi bi-calendar-event"></i>
+                    <span th:text="${#strings.substring(dto.regDate, 0, 10)}">Created Date</span> &nbsp;|&nbsp;
+                    <i class="bi bi-clock-history"></i>
+                    <span th:text="${#strings.substring(dto.modDate, 0, 10)}">Modified Date</span>
+                </div>
+                <div class="border rounded bg-light p-4" style="white-space: pre-wrap;" th:text="${dto.content}">Post Content</div>
+            </div>
+        </div>
+
+        <!-- Comment Form -->
+        <div class="mb-5">
+            <h5 class="mb-3 text-dark"><i class="bi bi-chat-left-text"></i> Leave a Comment</h5>
+            <div class="card shadow-sm p-3">
+                <form class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" id="replyWriter" class="form-control" placeholder="Your name" />
+                    </div>
+                    <div class="col-md-7">
+                        <textarea id="replyText" class="form-control" rows="2" placeholder="Write your comment here..."></textarea>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="button" id="replySubmitBtn" class="btn btn-success">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Comment List -->
+        <div id="replyListBox">
+            <!-- Comment list will appear here -->
+        </div>
+
+        <div class="d-grid mt-3">
+            <button id="loadMoreBtn" class="btn btn-outline-primary">Load More</button>
+        </div>
+
+
+        <!-- Navigation Buttons -->
+        <input type="hidden" id="currentBno" th:value="${dto.bno}" />
+        <div class="mt-4 text-end" th:with="link=${pageRequestDTO.getLink()}">
+            <a th:href="@{'/board/list' + ${link}}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-arrow-left-circle"></i> Back to List
+            </a>
+            <a th:href="@{'/board/modify?bno=' + ${dto.bno} + '&' + ${pageRequestDTO.getLink()}}" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil-square"></i> Edit Post
+            </a>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/reply.js"></script>
+</th:block>
+
+</body>
+</html>

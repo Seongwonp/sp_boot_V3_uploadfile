@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ex1</title>
+</head>
+<body>
+
+<!--/*@thymesVar id="list" type=""*/-->
+
+<ul>
+    <li th:each="str, status: ${list}">
+        [[${status.index}]] -- [[${str}]]
+    </li>
+    <li th:each="str, status: ${list}" th:text="${status.count}"></li>
+</ul>
+
+<hr>
+
+<ul>
+    <th:block th:each="str : ${list}">
+        <li>[[${str}]]</li>
+    </th:block>
+</ul>
+
+<hr>
+
+<ul>
+    <li th:each="str, status: ${list}">
+     <span th:if="${status.odd}">ODD --- [[${str}]]</span>
+     <span th:unless="${status.odd}">Even --- [[${str}]]</span>
+    </li>
+</ul>
+
+<hr>
+<ul>
+    <li th:each="str, status: ${list}">
+        <!--/* 참이면 실행*/-->
+        <span th:if="${status.even}">Even --- [[${str}]]</span>
+        <!--/* 거짓 이면 실행*/-->
+        <span th:unless="${status.even}">ODD --- [[${str}]]</span>
+    </li>
+</ul>
+<hr>
+<ul>
+    <li th:each="str, status: ${list}">
+        <!--/* 삼항연산 , 이항처리(if 처럼) 가능. */-->
+        <span th:text="${status.odd} ? 'ODD ---'+ ${str} : 'EVEN ---' + ${str}"></span>
+    </li>
+</ul>
+<hr>
+<ul>
+    <li th:each="str, status: ${list}">
+        <!--/* switch */-->
+        <th:block>
+            <span th:switch="${status.index % 3}">
+                <span th:case="0">0</span>
+                <span th:case="1">1</span>
+                <span th:case="2">2</span>
+            </span>
+        </th:block>
+    </li>
+</ul>
+<hr>
+<!--/* 매개변수 값 넘기기. 자동으로 url 인코딩이 됨. */-->
+<a th:href="@{/hello(name='한글처리', age=16)}">Go to /hello</a>
+</body>
+</html>

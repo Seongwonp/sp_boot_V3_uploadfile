@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>layout1</title>
+</head>
+
+<body>
+
+<div>
+    <h3>Sample Layout Header (layout1.html)</h3>
+</div>
+
+<!--/* 변경될 영역 */-->
+<div layout:fragment="content">
+    <p>Page Contents Here</p>
+</div>
+
+<div>
+    <h3>Sample Layout Footer(layout1.html)</h3>
+</div>
+
+<!--/* 스크립트 들어갈 영역 */-->
+<th:block layout:fragment="script">
+<!--    <script th:inline="javascript">-->
+<!--       document.write('script (layout1.html)');-->
+<!--    </script>-->
+</th:block>
+
+<!--<script th:inline="javascript">-->
+<!--    document.write('script (layout1.html) 고정(layout 미지정)');-->
+<!--</script>-->
+
+</body>
+
+</html>

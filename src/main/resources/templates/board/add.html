@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>List</title>
+</head>
+
+<body>
+<div class="container py-5" layout:fragment="content">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📝 Create New Post</h5>
+            </div>
+            <div class="card-body">
+                <form action="/board/add" method="post" novalidate>
+                    <!-- Title Field -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold">Title</label>
+                        <input type="text" name="title" id="title" class="form-control" placeholder="Enter your post title">
+                    </div>
+
+                    <!-- Content Field -->
+                    <div class="mb-3">
+                        <label for="content" class="form-label fw-semibold">Content</label>
+                        <textarea name="content" id="content" class="form-control" rows="6" placeholder="Write your post content here..."></textarea>
+                    </div>
+
+                    <!-- Writer Field -->
+                    <div class="mb-3">
+                        <label for="writer" class="form-label fw-semibold">Writer</label>
+                        <input type="text" name="writer" id="writer" class="form-control" placeholder="Enter your name">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-success me-2">
+                            <i class="bi bi-check-circle-fill"></i> Submit
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Handling Script -->
+<script layout:fragment="script" th:inline="javascript">
+    const errors = [[${errors}]];
+    if (errors && errors.length > 0) {
+        let errorMessage = '';
+        for (let i = 0; i < errors.length; i++) {
+            errorMessage += `${errors[i].field}: ${errors[i].defaultMessage}\n`;
+        }
+        alert(errorMessage);
+    }
+</script>
+</body>
+
+</html>
