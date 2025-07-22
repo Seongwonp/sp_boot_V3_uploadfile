@@ -2,6 +2,7 @@ package com.openTime.sp_boot_V3_uploadfile.repository;
 
 import com.openTime.sp_boot_V3_uploadfile.domain.Board;
 import com.openTime.sp_boot_V3_uploadfile.dto.BoardListReplyCountDTO;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Log4j2
 @SpringBootTest
@@ -154,4 +156,33 @@ class BoardRepositoryTest {
         list.forEach(log::info);
     }
 
+
+    @Test
+    void insertWithImages(){
+        Board board = Board.builder()
+                .title("title with images")
+                .content("첨부파일 테스트")
+                .writer("tester")
+                .build();
+
+        for(int i = 0; i<3; i++){
+            board.addImage(UUID.randomUUID().toString(),"file" + (i+1) + ".jpg");
+            boardRepository.save(board);
+        }
+    }
+
+
+
+
+    @Test
+    @Transactional
+    void readWithImages(){
+        Long bno = 2L;
+        Optional<Board> result = boardRepository.findById(bno);
+        Board board = result.orElseThrow();
+        log.info("Board : {}",board);
+        log.info("-------- image -----------");
+        log.info("image: {}",board.getImageSet());
+
+    }
 }

@@ -56,6 +56,10 @@ dependencies {
     /* model mapper */
     implementation 'org.modelmapper:modelmapper:3.2.0'
 
+
+    // https://mvnrepository.com/artifact/net.coobird/thumbnailator
+    implementation("net.coobird:thumbnailator:0.4.19")
+
 }
 
 tasks.named('test') {
