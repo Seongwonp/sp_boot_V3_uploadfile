@@ -1,9 +1,6 @@
 package com.openTime.sp_boot_V3_uploadfile.service;
 
-import com.openTime.sp_boot_V3_uploadfile.dto.BoardDTO;
-import com.openTime.sp_boot_V3_uploadfile.dto.BoardListReplyCountDTO;
-import com.openTime.sp_boot_V3_uploadfile.dto.PageRequestDTO;
-import com.openTime.sp_boot_V3_uploadfile.dto.PageResponseDTO;
+import com.openTime.sp_boot_V3_uploadfile.dto.*;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +13,7 @@ class BoardServiceImplTest {
 
     @Autowired
     private BoardService boardService;
+
 
     @Test
     void add() {
@@ -71,6 +69,18 @@ class BoardServiceImplTest {
         log.info("pageResponseDTO : {}",pageResponseDTO);
         pageResponseDTO.getDtoList().forEach(log::info);
 
+    }
+
+    @Test
+    void getListWithAll() {
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .keyword("")
+                .type("tcw")
+                .build();
+        PageResponseDTO<BoardListAllDTO> pageResponseDTO = boardService.getListWithAll(pageRequestDTO);
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        log.info("pageResponseDTO : {}",pageResponseDTO);
+        pageResponseDTO.getDtoList().forEach(log::info);
     }
 
 }

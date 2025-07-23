@@ -1,20 +1,25 @@
 package com.openTime.sp_boot_V3_uploadfile.repository.search;
 
+import com.openTime.sp_boot_V3_uploadfile.dto.BoardImageDTO;
+import com.openTime.sp_boot_V3_uploadfile.dto.BoardListAllDTO;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import com.openTime.sp_boot_V3_uploadfile.domain.Board;
 import com.openTime.sp_boot_V3_uploadfile.domain.QBoard;
 import com.openTime.sp_boot_V3_uploadfile.domain.QReply;
 import com.openTime.sp_boot_V3_uploadfile.dto.BoardListReplyCountDTO;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-
+@Log4j2
 public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardSearch {
 
     public BoardSearchImpl() {
@@ -119,4 +124,63 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
 
         return new PageImpl<>(dtoList, pageable, total);
     }
+
+    @Override
+    public Page<BoardListAllDTO> searchWithAll(String[] types, String keyword, Pageable pageable) {
+        QBoard board = QBoard.board;
+        QReply reply = QReply.reply;
+
+        JPQLQuery<Board> boardJPQLQuery = from(board);
+        boardJPQLQuery.leftJoin(reply).on(reply.board.eq(board));
+
+
+        if (types != null && keyword != null && !keyword.trim().isEmpty()) {
+            BooleanBuilder builder = new BooleanBuilder();
+            for (String type : types) {
+                switch (type) {
+                    case "t" -> builder.or(board.title.containsIgnoreCase(keyword));
+                    case "w" -> builder.or(board.writer.containsIgnoreCase(keyword));
+                    case "c" -> builder.or(board.content.containsIgnoreCase(keyword));
+                }
+            }
+            boardJPQLQuery.where(builder);
+        }
+
+        boardJPQLQuery.groupBy(board);
+        getQuerydsl().applyPagination(pageable, boardJPQLQuery);
+
+        JPQLQuery<Tuple> tupleJPQLQuery = boardJPQLQuery.select(board, reply.countDistinct());
+        List<Tuple> tupleList = tupleJPQLQuery.fetch();
+
+        List<BoardListAllDTO> dtoList = tupleList.stream().map(tuple -> {
+            Board boardEntity = tuple.get(board);
+            long replyCount = tuple.get(1, Long.class);
+
+            BoardListAllDTO dto = BoardListAllDTO.builder()
+                    .bno(boardEntity.getBno())
+                    .title(boardEntity.getTitle())
+                    .writer(boardEntity.getWriter())
+                    .regDate(boardEntity.getRegDate())
+                    .replyCount(replyCount)
+                    .build();
+
+            // 이미지 정렬 후 DTO로 변환
+            List<BoardImageDTO> imageDTOS = boardEntity.getImageSet().stream()
+                    .sorted()
+                    .map(img -> BoardImageDTO.builder()
+                            .uuid(img.getUuid())
+                            .fileName(img.getFileName())
+                            .ord(img.getOrd())
+                            .build())
+                    .toList();
+            dto.setBoardImages(imageDTOS);
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        long totalCount = boardJPQLQuery.fetchCount(); // 그룹화 후 count 정확히 계산
+
+        return new PageImpl<>(dtoList, pageable, totalCount);
+    }
+
 }

@@ -1,10 +1,7 @@
 package com.openTime.sp_boot_V3_uploadfile.controller;
 
 
-import com.openTime.sp_boot_V3_uploadfile.dto.BoardDTO;
-import com.openTime.sp_boot_V3_uploadfile.dto.BoardListReplyCountDTO;
-import com.openTime.sp_boot_V3_uploadfile.dto.PageRequestDTO;
-import com.openTime.sp_boot_V3_uploadfile.dto.PageResponseDTO;
+import com.openTime.sp_boot_V3_uploadfile.dto.*;
 import com.openTime.sp_boot_V3_uploadfile.service.BoardService;
 import com.openTime.sp_boot_V3_uploadfile.service.ReplyService;
 import jakarta.transaction.Transactional;
@@ -30,7 +27,7 @@ public class BoardController {
                      Model model) {
         log.info("************** list *************");
 
-        PageResponseDTO<BoardListReplyCountDTO> list = boardService.getListWithReplyCount(pageRequestDTO);
+        PageResponseDTO<BoardListAllDTO> list = boardService.getListWithAll(pageRequestDTO);
         model.addAttribute("responseDTO", list);
 
 //        log.info("pageRequestDTO : {}", list);
@@ -53,7 +50,11 @@ public class BoardController {
             redirectAttributes.addFlashAttribute("errors",bindingResult.getAllErrors());
             return "redirect:/board/add";
         }
-//        log.info("boardDTO : {}", boardDTO);
+
+        log.info("Title: {}", boardDTO.getTitle());
+        log.info("Writer: {}", boardDTO.getWriter());
+        log.info("FileNames: {}", boardDTO.getFileNames()); // 이미지 파일 확인
+
         Long bno = boardService.add(boardDTO);
         log.info("[Success] New board added Bno : {}", bno);
         redirectAttributes.addFlashAttribute("bno",bno);

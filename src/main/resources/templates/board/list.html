@@ -39,6 +39,7 @@
                 <thead class="table-light">
                 <tr>
                     <th scope="col">#</th>
+                    <th scope="col">Image</th>
                     <th scope="col">Title</th>
                     <th scope="col">Author</th>
                     <th scope="col">Date</th>
@@ -47,6 +48,17 @@
                 <tbody>
                 <tr th:each="dto : ${responseDTO.dtoList}" th:attr="data-bno=${dto.bno}" style="cursor:pointer;">
                     <td>[[${dto.bno}]]</td>
+
+                    <td>
+                        <div th:if="${!#lists.isEmpty(dto.boardImages)}">
+                            <img th:src="@{'/api/file/view/s_' + ${dto.boardImages[0].uuid} + '_' + ${dto.boardImages[0].fileName}}"
+                                 width="60" height="60" class="rounded shadow-sm"/>
+                        </div>
+                        <div th:if="${#lists.isEmpty(dto.boardImages)}">
+                            <img src="/static/assets/no_image.jpg" width="60" height="60" class="rounded border"/>
+                        </div>
+                    </td>
+
                     <td>
                         [[${dto.title}]]
                         <span th:if="${dto.replyCount > 0}" class="badge rounded-pill bg-secondary ms-2">[[${dto.replyCount}]]</span>

@@ -4,7 +4,7 @@
       layout:decorate="~{layout/basic.html}">
 <head>
     <meta charset="UTF-8">
-    <title>List</title>
+    <title>Add New Post</title>
 </head>
 
 <body>
@@ -15,7 +15,7 @@
                 <h5 class="mb-0">📝 Create New Post</h5>
             </div>
             <div class="card-body">
-                <form action="/board/add" method="post" novalidate>
+                <form action="/board/add" method="post" enctype="application/x-www-form-urlencoded" novalidate>
                     <!-- Title Field -->
                     <div class="mb-3">
                         <label for="title" class="form-label fw-semibold">Title</label>
@@ -34,6 +34,16 @@
                         <input type="text" name="writer" id="writer" class="form-control" placeholder="Enter your name">
                     </div>
 
+                    <!-- File Upload Field -->
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label fw-semibold">Attach Files</label>
+                        <input type="file" id="fileUpload" class="form-control" multiple>
+                        <div id="uploadPreview" class="mt-2"></div>
+                    </div>
+
+                    <!-- Hidden Input: Uploaded File Names -->
+                    <div id="uploadedFiles"></div>
+
                     <!-- Buttons -->
                     <div class="text-end mt-4">
                         <button type="submit" class="btn btn-success me-2">
@@ -49,17 +59,46 @@
     </div>
 </div>
 
-<!-- Error Handling Script -->
+<!-- Scripts -->
 <script layout:fragment="script" th:inline="javascript">
     const errors = [[${errors}]];
     if (errors && errors.length > 0) {
         let errorMessage = '';
-        for (let i = 0; i < errors.length; i++) {
-            errorMessage += `${errors[i].field}: ${errors[i].defaultMessage}\n`;
-        }
+        errors.forEach(err => {
+            errorMessage += `${err.field}: ${err.defaultMessage}\n`;
+        });
         alert(errorMessage);
     }
+
+    // 🔁 Upload logic
+    document.querySelector('#fileUpload').addEventListener('change', async (e) => {
+        const files = e.target.files;
+        const formData = new FormData();
+        for (const file of files) {
+            formData.append("files", file);
+        }
+
+        const res = await fetch("/api/file/upload", { method: "POST", body: formData });
+        const result = await res.json(); // Expecting ["UUID_filename.ext", ...]
+
+        const uploadedFilesDiv = document.getElementById("uploadedFiles");
+        const previewDiv = document.getElementById("uploadPreview");
+        uploadedFilesDiv.innerHTML = "";
+        previewDiv.innerHTML = "";
+
+        result.forEach(fileName => {
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "fileNames";
+            hiddenInput.value = fileName;
+            uploadedFilesDiv.appendChild(hiddenInput);
+
+            const span = document.createElement("span");
+            span.className = "badge bg-light text-dark me-1";
+            span.textContent = fileName;
+            previewDiv.appendChild(span);
+        });
+    });
 </script>
 </body>
-
 </html>

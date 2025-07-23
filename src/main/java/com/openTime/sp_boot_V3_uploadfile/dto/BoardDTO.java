@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,5 +27,8 @@ public class BoardDTO {
     private String writer;
     private String regDate;
     private String modDate;
+
+    //첨부파일의 이름들
+    private List<String> fileNames;
 
 }

@@ -1,7 +1,9 @@
 package com.openTime.sp_boot_V3_uploadfile.repository;
 
 import com.openTime.sp_boot_V3_uploadfile.domain.Board;
+import com.openTime.sp_boot_V3_uploadfile.domain.BoardImage;
 import com.openTime.sp_boot_V3_uploadfile.dto.BoardListReplyCountDTO;
+import com.openTime.sp_boot_V3_uploadfile.repository.search.BoardSearch;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +25,8 @@ class BoardRepositoryTest {
 
     @Autowired
     private BoardRepository boardRepository;
+
+
 
     @Test
     void insert() {
@@ -178,11 +183,36 @@ class BoardRepositoryTest {
     @Transactional
     void readWithImages(){
         Long bno = 2L;
-        Optional<Board> result = boardRepository.findById(bno);
+        Optional<Board> result = boardRepository.findByBnoWithImage(bno);
         Board board = result.orElseThrow();
         log.info("Board : {}",board);
         log.info("-------- image -----------");
-        log.info("image: {}",board.getImageSet());
+        for(BoardImage boardImage : board.getImageSet()){
+         log.info("Image: {}", boardImage);
+        }
 
     }
+
+
+
+    @Test
+    @Transactional
+    @Commit
+    public void modifyWithImages(){
+        Long bno = 2L;
+        Optional<Board> result = boardRepository.findByBnoWithImage(bno);
+        Board board = result.orElseThrow();
+
+        board.clearImages();
+
+        for(int i = 0; i< 2; i++){
+            board.addImage(UUID.randomUUID().toString(),
+                    "updateFile" + (i+1) + ".jpg");
+        }
+        boardRepository.save(board);
+    }
+
+
+
+
 }
