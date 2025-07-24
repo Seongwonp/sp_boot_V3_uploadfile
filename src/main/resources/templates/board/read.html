@@ -10,20 +10,40 @@
 <body>
 <div layout:fragment="content">
     <div class="container py-4">
-        <!-- Post Header Card -->
+        <!-- Post Header -->
         <div class="card border-0 shadow rounded-4 mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h3 class="fw-bold mb-0 text-primary" th:text="${dto.title}">Post Title</h3>
                     <span class="badge bg-info text-dark" th:text="${dto.writer}">Author</span>
                 </div>
+
+                <!-- Dates -->
                 <div class="mb-3 text-muted small">
                     <i class="bi bi-calendar-event"></i>
                     <span th:text="${#strings.substring(dto.regDate, 0, 10)}">Created Date</span> &nbsp;|&nbsp;
                     <i class="bi bi-clock-history"></i>
-                    <span th:text="${#strings.substring(dto.modDate, 0, 10)}">Modified Date</span>
+                    <span th:text="${#strings.substring(dto.modDate, 0, 10)}">Last Modified</span>
                 </div>
-                <div class="border rounded bg-light p-4" style="white-space: pre-wrap;" th:text="${dto.content}">Post Content</div>
+
+                <!-- Post Content -->
+                <div class="border rounded bg-light p-4 mb-3" style="white-space: pre-wrap;" th:text="${dto.content}">Post Content</div>
+
+                <!-- 첨부 파일 -->
+                <div class="mb-3" th:if="${dto.fileNames != null && !dto.fileNames.isEmpty()}">
+                    <h6 class="fw-bold">📎 Attached Files</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <th:block th:each="fileName : ${dto.fileNames}">
+                            <a th:href="@{/api/file/view/{name}(name=${fileName})}" target="_blank">
+                                <img th:src="@{/api/file/view/{name}(name='s_' + ${fileName})}"
+                                     th:alt="${fileName}"
+                                     width="120"
+                                     class="border rounded shadow-sm" />
+                            </a>
+                        </th:block>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -46,14 +66,12 @@
         </div>
 
         <!-- Comment List -->
-        <div id="replyListBox">
-            <!-- Comment list will appear here -->
-        </div>
+        <div id="replyListBox"></div>
 
+        <!-- Load More Button -->
         <div class="d-grid mt-3">
             <button id="loadMoreBtn" class="btn btn-outline-primary">Load More</button>
         </div>
-
 
         <!-- Navigation Buttons -->
         <input type="hidden" id="currentBno" th:value="${dto.bno}" />
@@ -67,10 +85,11 @@
         </div>
     </div>
 </div>
+
+<!-- Scripts -->
 <th:block layout:fragment="script">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/js/reply.js"></script>
 </th:block>
-
 </body>
 </html>

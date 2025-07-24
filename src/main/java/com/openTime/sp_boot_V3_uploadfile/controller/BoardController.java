@@ -11,8 +11,11 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Log4j2
 @Controller
@@ -35,7 +38,7 @@ public class BoardController {
 
     @GetMapping("/add")
     public void addGet(BoardDTO boardDTO,
-                       @ModelAttribute("errors") Object errors,
+                       @ModelAttribute("errors") List<ObjectError> errors,
                        Model model) {
         log.info("************** addForm *************");
         model.addAttribute("errors", errors);  // 명시적으로 넣어주기

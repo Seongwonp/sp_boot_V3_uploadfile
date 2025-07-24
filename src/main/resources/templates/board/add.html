@@ -16,32 +16,34 @@
             </div>
             <div class="card-body">
                 <form action="/board/add" method="post" enctype="application/x-www-form-urlencoded" novalidate>
-                    <!-- Title Field -->
+                    <!-- Title -->
                     <div class="mb-3">
                         <label for="title" class="form-label fw-semibold">Title</label>
                         <input type="text" name="title" id="title" class="form-control" placeholder="Enter your post title">
                     </div>
 
-                    <!-- Content Field -->
+                    <!-- Content -->
                     <div class="mb-3">
                         <label for="content" class="form-label fw-semibold">Content</label>
                         <textarea name="content" id="content" class="form-control" rows="6" placeholder="Write your post content here..."></textarea>
                     </div>
 
-                    <!-- Writer Field -->
+                    <!-- Writer -->
                     <div class="mb-3">
                         <label for="writer" class="form-label fw-semibold">Writer</label>
                         <input type="text" name="writer" id="writer" class="form-control" placeholder="Enter your name">
                     </div>
 
-                    <!-- File Upload Field -->
+                    <!-- File Upload -->
                     <div class="mb-3">
                         <label for="fileUpload" class="form-label fw-semibold">Attach Files</label>
                         <input type="file" id="fileUpload" class="form-control" multiple>
-                        <div id="uploadPreview" class="mt-2"></div>
+                        <div id="uploadPreview" class="mt-2 d-flex flex-wrap gap-2">
+                            <!-- 썸네일이 누적됨 -->
+                        </div>
                     </div>
 
-                    <!-- Hidden Input: Uploaded File Names -->
+                    <!-- Hidden Inputs -->
                     <div id="uploadedFiles"></div>
 
                     <!-- Buttons -->
@@ -61,44 +63,120 @@
 
 <!-- Scripts -->
 <script layout:fragment="script" th:inline="javascript">
-    const errors = [[${errors}]];
-    if (errors && errors.length > 0) {
-        let errorMessage = '';
-        errors.forEach(err => {
-            errorMessage += `${err.field}: ${err.defaultMessage}\n`;
-        });
-        alert(errorMessage);
-    }
+    let selectedFiles = []; // 누적 파일 리스트
 
-    // 🔁 Upload logic
-    document.querySelector('#fileUpload').addEventListener('change', async (e) => {
-        const files = e.target.files;
-        const formData = new FormData();
-        for (const file of files) {
-            formData.append("files", file);
-        }
+    const uploadedFilesDiv = document.getElementById("uploadedFiles");
+    const previewDiv = document.getElementById("uploadPreview");
+    const fileInput = document.getElementById("fileUpload");
 
-        const res = await fetch("/api/file/upload", { method: "POST", body: formData });
-        const result = await res.json(); // Expecting ["UUID_filename.ext", ...]
+    fileInput.addEventListener('change', (e) => {
+        const newFiles = Array.from(e.target.files);
 
-        const uploadedFilesDiv = document.getElementById("uploadedFiles");
-        const previewDiv = document.getElementById("uploadPreview");
-        uploadedFilesDiv.innerHTML = "";
+        // 누적 파일에 추가
+        selectedFiles = [...selectedFiles, ...newFiles];
+        console.log("전체 선택된 파일:", selectedFiles);
+
+        // input 초기화 (같은 파일 다시 선택 가능하게)
+        fileInput.value = "";
+
+        // 프리뷰 전체 초기화 후 재렌더링
         previewDiv.innerHTML = "";
 
-        result.forEach(fileName => {
-            const hiddenInput = document.createElement("input");
-            hiddenInput.type = "hidden";
-            hiddenInput.name = "fileNames";
-            hiddenInput.value = fileName;
-            uploadedFilesDiv.appendChild(hiddenInput);
+        selectedFiles.forEach((file, index) => {
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const container = document.createElement("div");
+                    container.className = "position-relative";
 
-            const span = document.createElement("span");
-            span.className = "badge bg-light text-dark me-1";
-            span.textContent = fileName;
-            previewDiv.appendChild(span);
+                    const img = document.createElement("img");
+                    img.src = event.target.result;
+                    img.alt = file.name;
+                    img.width = 80;
+                    img.className = "border rounded mb-2 me-2 shadow-sm";
+
+                    // 삭제 버튼
+                    const delBtn = document.createElement("button");
+                    delBtn.type = "button";
+                    delBtn.className = "btn-close position-absolute top-0 end-0";
+                    delBtn.onclick = () => {
+                        selectedFiles.splice(index, 1);
+                        renderPreview();
+                    };
+
+                    container.appendChild(img);
+                    container.appendChild(delBtn);
+                    previewDiv.appendChild(container);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                const badge = document.createElement("span");
+                badge.className = "badge bg-secondary mb-1 me-2";
+                badge.textContent = file.name;
+                previewDiv.appendChild(badge);
+            }
         });
     });
+
+    function renderPreview() {
+        previewDiv.innerHTML = "";
+        uploadedFilesDiv.innerHTML = "";
+
+        selectedFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = document.createElement("img");
+                img.src = event.target.result;
+                img.width = 80;
+                img.className = "border rounded mb-2 me-2 shadow-sm";
+                previewDiv.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 업로드 로직은 나중에 submit 시점에 실행 가능
+    document.querySelector("form").addEventListener("submit", async function (e) {
+        e.preventDefault(); // 기본 제출 막기
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        // 선택된 파일 누적 → 서버로 전송
+        selectedFiles.forEach(file => {
+            formData.append("files", file);
+        });
+
+        try {
+            const res = await fetch("/api/file/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await res.json();
+            console.log("최종 서버 응답:", result);
+
+            // 파일 이름 정보를 hidden input으로 반영
+            result.forEach(file => {
+                const fullName = `${file.uuid}_${file.fileName}`;
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "fileNames";
+                hiddenInput.value = fullName;
+                uploadedFilesDiv.appendChild(hiddenInput);
+            });
+
+            // 서버 업로드가 성공한 후 → 실제 form 제출
+            form.submit();
+
+        } catch (err) {
+            alert("업로드 또는 제출 중 오류가 발생했습니다.");
+            console.error("Upload/Submit failed:", err);
+        }
+    });
+
 </script>
+
+
 </body>
 </html>
